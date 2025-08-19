@@ -1,0 +1,8 @@
+package com.dacinc.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.dacinc.controller.Payment;
+
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
+}

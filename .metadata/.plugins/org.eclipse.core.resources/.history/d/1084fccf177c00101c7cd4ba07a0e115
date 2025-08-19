@@ -1,0 +1,36 @@
+package com.dacinc.controller;
+
+@RestController
+@RequestMapping("/api/dealers")
+public class DealerController {
+    
+    @Autowired
+    private DealerService dealerService;
+    
+    @GetMapping
+    public ResponseEntity<List<Dealer>> getAllDealers() {
+        return ResponseEntity.ok(dealerService.findAll());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Dealer> getDealerById(@PathVariable Long id) {
+        return ResponseEntity.ok(dealerService.findById(id));
+    }
+    
+    @PostMapping
+    public ResponseEntity<Dealer> createDealer(@Valid @RequestBody Dealer dealer) {
+        return new ResponseEntity<>(dealerService.save(dealer), HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Dealer> updateDealer(@PathVariable Long id, @Valid @RequestBody Dealer dealer) {
+        return ResponseEntity.ok(dealerService.update(id, dealer));
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDealer(@PathVariable Long id) {
+        dealerService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+

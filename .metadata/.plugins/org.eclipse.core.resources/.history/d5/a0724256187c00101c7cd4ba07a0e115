@@ -1,0 +1,5 @@
+package com.dacinc.constants;
+
+public class PaymentStatus {
+
+}

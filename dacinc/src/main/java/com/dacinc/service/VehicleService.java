@@ -1,0 +1,66 @@
+package com.dacinc.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dacinc.constants.SubscriptionType;
+import com.dacinc.entity.Dealer;
+import com.dacinc.entity.Vehicle;
+import com.dacinc.exception.ResourceNotFoundException;
+import com.dacinc.repo.DealerRepository;
+import com.dacinc.repo.VehicleRepository;
+
+@Service
+public class VehicleService {
+    
+    @Autowired
+    private VehicleRepository vehicleRepository;
+    
+    @Autowired
+    private DealerRepository dealerRepository;
+    
+    public List<Vehicle> findAll() {
+        return vehicleRepository.findAll();
+    }
+    
+    public List<Vehicle> findByPremiumDealers() {
+        return vehicleRepository.findByDealerSubscriptionType(SubscriptionType.PREMIUM);
+    }
+    
+    public Vehicle findById(Long id) {
+        return vehicleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + id));
+    }
+    
+    public Vehicle save(Vehicle vehicle) {
+        // Verify dealer exists
+        dealerRepository.findById(vehicle.getDealer().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Dealer not found with id: " + vehicle.getDealer().getId()));
+        return vehicleRepository.save(vehicle);
+    }
+    
+    public Vehicle update(Long id, Vehicle vehicleDetails) {
+        Vehicle vehicle = findById(id);
+        vehicle.setModel(vehicleDetails.getModel());
+        vehicle.setPrice(vehicleDetails.getPrice());
+        vehicle.setStatus(vehicleDetails.getStatus());
+        
+        // Update dealer if changed
+        if (!vehicle.getDealer().getId().equals(vehicleDetails.getDealer().getId())) {
+            Dealer dealer = dealerRepository.findById(vehicleDetails.getDealer().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Dealer not found with id: " + vehicleDetails.getDealer().getId()));
+            vehicle.setDealer(dealer);
+        }
+        
+        return vehicleRepository.save(vehicle);
+    }
+    
+    public void delete(Long id) {
+        Vehicle vehicle = findById(id);
+        vehicleRepository.delete(vehicle);
+    }
+}

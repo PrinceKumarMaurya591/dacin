@@ -1,0 +1,30 @@
+package com.dacinc.security;
+
+
+import java.util.Collections;  // Alternative import
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import com.dacinc.entity.Dealer;
+import com.dacinc.repo.DealerRepository;
+
+@Service
+public class JwtUserDetailsService implements UserDetailsService {
+    
+    @Autowired
+    private DealerRepository dealerRepository;
+    
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Dealer dealer = dealerRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        
+        return new org.springframework.security.core.userdetails.User(
+                dealer.getEmail(),
+                dealer.getPassword(),
+                Collections.emptyList());  // Using Collections.emptyList()
+    }
+}

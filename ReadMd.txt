@@ -1,0 +1,132 @@
+dacinc backend project with spring security
+
+Complete API Documentation Authentication Endpoints
+
+Register a New Dealer Endpoint: POST /api/auth/register
+Headers: Content-Type: application/json
+
+Request Body:
+
+json { "name": "Premium Auto", "email": "premium@example.com", "password": "securepassword123", "subscriptionType": "PREMIUM" } Response:
+
+json { "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZWFsZXIzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU1NjAzMTIxLCJleHAiOjE3NTU2ODk1MjF9.PUvMikUbKc_EZNz7Yy7A0WZ6tnvNQ4TOGaC9fSTMmcs" } 2. Login Endpoint: POST /api/auth/login
+
+Headers: Content-Type: application/json
+
+Request Body:
+
+json { "email": "premium@example.com", "password": "securepassword123" } Response:
+
+json { "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZWFsZXIzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU1NjAzMTIxLCJleHAiOjE3NTU2ODk1MjF9.PUvMikUbKc_EZNz7Yy7A0WZ6tnvNQ4TOGaC9fSTMmcs" } Dealer Management Endpoints 3. Get All Dealers Endpoint: GET /api/dealers
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Response:
+
+json [ { "id": 1, "name": "Premium Auto", "email": "premium@example.com", "subscriptionType": "PREMIUM" } ] 4. Get Dealer by ID Endpoint: GET /api/dealers/{id}
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Response:
+
+json { "id": 1, "name": "Premium Auto", "email": "premium@example.com", "subscriptionType": "PREMIUM" } 5. Create Dealer (Alternative to register) Endpoint: POST /api/dealers
+
+Headers:
+
+Authorization: Bearer <JWT_TOKEN>
+
+Content-Type: application/json
+
+Request Body:
+
+json { "name": "Basic Motors", "email": "basic@example.com", "password": "password123", "subscriptionType": "BASIC" } 6. Update Dealer Endpoint: PUT /api/dealers/{id}
+
+Headers:
+
+Authorization: Bearer <JWT_TOKEN>
+
+Content-Type: application/json
+
+Request Body:
+
+json { "name": "Updated Premium Auto", "email": "updated@example.com", "password": "newpassword123", "subscriptionType": "PREMIUM" } 7. Delete Dealer Endpoint: DELETE /api/dealers/{id}
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Vehicle Management Endpoints 8. Get All Vehicles Endpoint: GET /api/vehicles
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Response:
+
+json [ { "id": 1, "dealer": { "id": 1, "name": "Premium Auto", "email": "premium@example.com", "subscriptionType": "PREMIUM" }, "model": "Tesla Model S", "price": 79999.99, "status": "AVAILABLE" } ] 9. Get Premium Dealer Vehicles (Task 1 Requirement) Endpoint: GET /api/vehicles/premium
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Response:
+
+json [ { "id": 1, "dealer": { "id": 1, "name": "Premium Auto", "email": "premium@example.com", "subscriptionType": "PREMIUM" }, "model": "Tesla Model S", "price": 79999.99, "status": "AVAILABLE" } ] 10. Create Vehicle Endpoint: POST /api/vehicles
+
+Headers:
+
+Authorization: Bearer <JWT_TOKEN>
+
+Content-Type: application/json
+
+Request Body:
+
+json { "dealer": { "id": 1 }, "model": "BMW X5", "price": 59999.99, "status": "AVAILABLE" } 11. Update Vehicle Endpoint: PUT /api/vehicles/{id}
+
+Headers:
+
+Authorization: Bearer <JWT_TOKEN>
+
+Content-Type: application/json
+
+Request Body:
+
+json { "dealer": { "id": 1 }, "model": "BMW X5 Updated", "price": 64999.99, "status": "SOLD" } 12. Delete Vehicle Endpoint: DELETE /api/vehicles/{id}
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Payment Endpoints (Task 2) 13. Initiate Payment Endpoint: POST /api/payment/initiate
+
+Headers:
+
+Authorization: Bearer <JWT_TOKEN>
+
+Content-Type: application/json
+
+Request Body:
+
+json { "dealerId": 1, "amount": 199.99, "method": "CARD" } Response:
+
+json { "id": 1, "dealer": { "id": 1, "name": "Premium Auto", "email": "premium@example.com", "subscriptionType": "PREMIUM" }, "amount": 199.99, "method": "CARD", "status": "PENDING", "createdAt": "2023-10-20T12:00:00Z", "updatedAt": "2023-10-20T12:00:00Z" } 14. Check Payment Status Endpoint: GET /api/payment/{id}
+
+Headers: Authorization: Bearer <JWT_TOKEN>
+
+Response (after 5 seconds):
+
+json { "id": 1, "dealer": { "id": 1, "name": "Premium Auto", "email": "premium@example.com", "subscriptionType": "PREMIUM" }, "amount": 199.99, "method": "CARD", "status": "SUCCESS", "createdAt": "2023-10-20T12:00:00Z", "updatedAt": "2023-10-20T12:00:05Z" } Database Schema Your JPA entities will auto-generate these tables:
+
+Dealers Table sql CREATE TABLE dealers ( id BIGSERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, subscription_type VARCHAR(10) NOT NULL ); Vehicles Table sql CREATE TABLE vehicles ( id BIGSERIAL PRIMARY KEY, dealer_id BIGINT NOT NULL REFERENCES dealers(id), model VARCHAR(255) NOT NULL, price DOUBLE PRECISION NOT NULL, status VARCHAR(10) NOT NULL ); Payments Table sql CREATE TABLE payments ( id BIGSERIAL PRIMARY KEY, dealer_id BIGINT NOT NULL REFERENCES dealers(id), amount DOUBLE PRECISION NOT NULL, method VARCHAR(20) NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'PENDING', created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL ); Setup and Deployment Instructions Prerequisites Java 17 or higher
+
+PostgreSQL
+
+Maven
+
+Application Configuration Create application.properties:
+
+properties spring.datasource.url=jdbc:postgresql://localhost:5432/dealer_management spring.datasource.username=postgres spring.datasource.password=yourpassword spring.jpa.hibernate.ddl-auto=update spring.jpa.show-sql=true spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect Build and Run bash mvn clean install java -jar target/your-project-name.jar Access Swagger UI Once running, access API documentation at:
+
+text http://localhost:8080/swagger-ui.html Submission Checklist ✅ Spring Boot project with working APIs
+
+✅ SQL schema (auto-generated via JPA)
+
+✅ Postman collection
+
+✅ API endpoints with request/response examples (provided above)
+
+✅ PostgreSQL table to store transactions (defined in schema)
+
+✅ JWT authentication (implemented)

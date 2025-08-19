@@ -1,0 +1,65 @@
+package com.dacinc.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dacinc.entity.Dealer;
+import com.dacinc.service.DealerService;
+
+
+@RestController
+@RequestMapping("/api/dealers")
+public class DealerController {
+    
+    @Autowired
+    private DealerService dealerService;
+    
+    @GetMapping
+    public ResponseEntity<List<Dealer>> getAllDealers() {
+        return ResponseEntity.ok(dealerService.findAll());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Dealer> getDealerById(@PathVariable Long id) {
+        return ResponseEntity.ok(dealerService.findById(id));
+    }
+    
+    @PostMapping
+    public ResponseEntity<Dealer> createDealer(@Validated @RequestBody Dealer dealer) {
+        return new ResponseEntity<>(dealerService.save(dealer), HttpStatus.CREATED);
+    }
+    
+    
+    @PostMapping("/register")
+    public ResponseEntity<Dealer> registerDealer(@Validated @RequestBody Dealer dealer) {
+        if (dealer.getPassword() == null || dealer.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+        Dealer registeredDealer = dealerService.registerDealer(dealer);
+        return new ResponseEntity<>(registeredDealer, HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Dealer> updateDealer(@PathVariable Long id, @Validated @RequestBody Dealer dealer) {
+        return ResponseEntity.ok(dealerService.update(id, dealer));
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDealer(@PathVariable Long id) {
+        dealerService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+

@@ -1,0 +1,40 @@
+package com.dacinc.controller;
+
+@RestController
+@RequestMapping("/api/vehicles")
+public class VehicleController {
+    
+    @Autowired
+    private VehicleService vehicleService;
+    
+    @GetMapping
+    public ResponseEntity<List<Vehicle>> getAllVehicles() {
+        return ResponseEntity.ok(vehicleService.findAll());
+    }
+    
+    @GetMapping("/premium")
+    public ResponseEntity<List<Vehicle>> getPremiumDealerVehicles() {
+        return ResponseEntity.ok(vehicleService.findByPremiumDealers());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Vehicle> getVehicleById(@PathVariable Long id) {
+        return ResponseEntity.ok(vehicleService.findById(id));
+    }
+    
+    @PostMapping
+    public ResponseEntity<Vehicle> createVehicle(@Valid @RequestBody Vehicle vehicle) {
+        return new ResponseEntity<>(vehicleService.save(vehicle), HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Vehicle> updateVehicle(@PathVariable Long id, @Valid @RequestBody Vehicle vehicle) {
+        return ResponseEntity.ok(vehicleService.update(id, vehicle));
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
+        vehicleService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

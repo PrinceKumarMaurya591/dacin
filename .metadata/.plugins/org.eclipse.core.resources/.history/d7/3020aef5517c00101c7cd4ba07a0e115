@@ -1,0 +1,53 @@
+package com.dacinc.springsecurity;
+
+
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthenticationService {
+
+    private final DealerRepository dealerRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    public AuthenticationService(DealerRepository dealerRepository, PasswordEncoder passwordEncoder,
+                                JwtService jwtService, AuthenticationManager authenticationManager) {
+        this.dealerRepository = dealerRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+    }
+
+    public AuthenticationResponse register(AuthenticationRequest request) {
+        Dealer dealer = new Dealer();
+        dealer.setEmail(request.getEmail());
+        dealer.setPassword(passwordEncoder.encode(request.getPassword()));
+        dealer.setName(request.getName());
+        dealer.setSubscriptionType(request.getSubscriptionType());
+        
+        dealerRepository.save(dealer);
+        
+        String jwtToken = jwtService.generateToken(dealer);
+        return new AuthenticationResponse(jwtToken);
+    }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        
+        Dealer dealer = dealerRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Dealer not found"));
+        
+        String jwtToken = jwtService.generateToken(dealer);
+        return new AuthenticationResponse(jwtToken);
+    }
+}

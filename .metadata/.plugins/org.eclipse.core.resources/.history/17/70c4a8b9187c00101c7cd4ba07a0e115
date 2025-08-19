@@ -1,0 +1,5 @@
+package com.dacinc.dto;
+
+public class PaymentRequest {
+
+}

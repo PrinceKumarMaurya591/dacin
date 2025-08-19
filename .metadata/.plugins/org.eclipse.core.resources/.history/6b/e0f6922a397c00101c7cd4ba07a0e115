@@ -1,0 +1,11 @@
+spring.application.name=dacinc
+
+
+#spring.datasource.url=jdbc:postgresql://localhost:5432/dealer_management
+spring.datasource.url=jdbc:mysql://localhost:3306/dealer_management
+
+spring.datasource.username=root
+spring.datasource.password=root
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+

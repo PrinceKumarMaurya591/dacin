@@ -1,0 +1,68 @@
+package com.dacinc.service;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
+import com.dacinc.dto.PaymentRequest;
+import com.dacinc.entity.Dealer;
+import com.dacinc.entity.Payment;
+import com.dacinc.exception.ResourceNotFoundException;
+import com.dacinc.repo.DealerRepository;
+import com.dacinc.repo.PaymentRepository;
+
+@Service
+public class PaymentService {
+    
+    @Autowired
+    private PaymentRepository paymentRepository;
+    
+    @Autowired
+    private DealerRepository dealerRepository;
+    
+    // Remove the SimpMessagingTemplate autowiring
+    
+    public Payment initiatePayment(PaymentRequest paymentRequest) {
+        Dealer dealer = dealerRepository.findById(paymentRequest.getDealerId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Dealer not found with id: " + paymentRequest.getDealerId()));
+        
+        Payment payment = new Payment();
+        payment.setDealer(dealer);
+        payment.setAmount(paymentRequest.getAmount());
+        payment.setMethod(paymentRequest.getMethod());
+        
+        Payment savedPayment = paymentRepository.save(payment);
+        
+        // Simulate async payment processing
+        simulatePaymentProcessing(savedPayment.getId());
+        
+        return savedPayment;
+    }
+    
+    private void simulatePaymentProcessing(Long paymentId) {
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.schedule(() -> {
+            Payment payment = paymentRepository.findById(paymentId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Payment not found with id: " + paymentId));
+            
+            payment.setStatus(PaymentStatus.SUCCESS);
+            paymentRepository.save(payment);
+            
+            // Remove the WebSocket notification line
+            // messagingTemplate.convertAndSend("/topic/payment/" + paymentId, payment);
+            
+        }, 5, TimeUnit.SECONDS);
+    }
+    
+    public Payment getPayment(Long id) {
+        return paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
+    }
+}

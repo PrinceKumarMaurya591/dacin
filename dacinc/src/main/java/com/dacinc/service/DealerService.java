@@ -1,0 +1,60 @@
+package com.dacinc.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.dacinc.entity.Dealer;
+import com.dacinc.exception.ResourceNotFoundException;
+import com.dacinc.repo.DealerRepository;
+
+@Service
+public class DealerService {
+    
+    @Autowired
+    private DealerRepository dealerRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    public Dealer registerDealer(Dealer dealer) {
+        // Encode password before saving
+        dealer.encodePassword(passwordEncoder);
+        return dealerRepository.save(dealer);
+    }
+    
+    public List<Dealer> findAll() {
+        return dealerRepository.findAll();
+    }
+    
+    public Dealer findById(Long id) {
+        return dealerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Dealer not found with id: " + id));
+    }
+    
+    
+    
+    public Dealer save(Dealer dealer) {
+        // Encode password before saving
+        dealer.encodePassword(passwordEncoder);
+        return dealerRepository.save(dealer);
+    }
+    
+    public Dealer update(Long id, Dealer dealerDetails) {
+        Dealer dealer = findById(id);
+        dealer.setName(dealerDetails.getName());
+        dealer.setEmail(dealerDetails.getEmail());
+        if (dealerDetails.getPassword() != null && !dealerDetails.getPassword().isEmpty()) {
+            dealer.setPassword(passwordEncoder.encode(dealerDetails.getPassword()));
+        }
+        dealer.setSubscriptionType(dealerDetails.getSubscriptionType());
+        return dealerRepository.save(dealer);
+    }
+    
+    public void delete(Long id) {
+        Dealer dealer = findById(id);
+        dealerRepository.delete(dealer);
+    }
+}

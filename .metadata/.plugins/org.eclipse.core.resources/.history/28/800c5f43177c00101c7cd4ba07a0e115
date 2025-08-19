@@ -1,0 +1,5 @@
+package com.dacinc.exception;
+
+public class ResourceNotFoundException {
+
+}

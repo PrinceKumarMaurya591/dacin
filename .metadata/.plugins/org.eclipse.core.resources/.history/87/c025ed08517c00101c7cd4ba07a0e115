@@ -1,0 +1,5 @@
+package com.dacinc.springsecurity;
+
+public class AuthenticationRequest {
+
+}
